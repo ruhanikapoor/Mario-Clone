@@ -26,7 +26,7 @@ A cute endless runner game inspired by classic Mario and Chrome Dino, built with
 | Desktop  | ↑ key to jump, R to restart |
 | Mobile   | Tap to jump or restart |
 
-## Assets
+## Assets 
 
 - Mario sprite sheet (custom cropped)
 - Ground, cloud, and block images
@@ -45,3 +45,7 @@ A cute endless runner game inspired by classic Mario and Chrome Dino, built with
 ## Try It Here
 
 [Mario Endless Runner](https://mario-endless-runner.netlify.app/)
+
+## Credits
+
+Mario sprites and music are owned by Nintendo.
