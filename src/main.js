@@ -43,23 +43,34 @@ const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 const game = new Phaser.Game(config);
 const tileWidth = 54;
 
-function checkOrientation() {
+function checkOrientation(forceReload = false) {
   const isPortrait = window.innerHeight > window.innerWidth;
   const isMobile = /Mobi|Android/i.test(navigator.userAgent);
   const warning = document.getElementById("rotate-warning");
 
-  if (isPortrait && isMobile) {
-    warning.style.display = "flex";
-    game.canvas.style.display = "none";
-  } else {
-    warning.style.display = "none";
-    game.canvas.style.display = "block";
+  if (isMobile) {
+    if (isPortrait) {
+      warning.style.display = "flex";
+      game.canvas.style.display = "none";
+    } else {
+      warning.style.display = "none";
+      game.canvas.style.display = "block";
+      if (forceReload) {
+        location.reload();
+      }
+    }
   }
 }
 
-window.addEventListener("resize", checkOrientation);
-window.addEventListener("orientationchange", checkOrientation);
-window.addEventListener("load", checkOrientation);
+window.addEventListener("orientationchange", () => {
+  setTimeout(() => checkOrientation(true), 300);
+});
+
+window.addEventListener("resize", () => {
+  setTimeout(() => checkOrientation(false), 100);
+});
+
+window.addEventListener("load", () => checkOrientation(false));
 
 
 function preload() {
