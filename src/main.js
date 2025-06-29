@@ -36,11 +36,15 @@ let startText;
 let score = 0;
 let scoreText;
 let nextObstacleTime = 0;
+let themeMusic;
+let jumpSound;
 
 const game = new Phaser.Game(config);
 const tileWidth = 54;
 
 function preload() {
+  this.load.audio("theme", "/assets/theme.mp3");
+  this.load.audio("jump", "/assets/jump.mp3");
   this.load.image("clouds", "/assets/clouds.png");
   this.load.image("ground", "/assets/ground.png");
   this.load.image("block", "/assets/block.png");
@@ -52,6 +56,11 @@ function preload() {
 
 function create() {
   const worldHeight = 1000;
+  themeMusic = this.sound.add("theme", {
+    loop: true,
+    volume: 0.5,
+  });
+  jumpSound = this.sound.add("jump", { volume: 0.4 });
 
   const cloudTexture = this.textures.get("clouds");
   const cloudStripHeight = cloudTexture.getSourceImage().height;
@@ -100,11 +109,16 @@ function create() {
   cursors = this.input.keyboard.createCursorKeys();
 
   gameOverText = this.add
-    .text(config.width / 2, config.height / 2, "Game Over!!\nPress R to Restart", {
-      fontSize: "32px",
-      fill: "#fff",
-      align: "center",
-    })
+    .text(
+      config.width / 2,
+      config.height / 2,
+      "Game Over!!\nPress R to Restart",
+      {
+        fontSize: "32px",
+        fill: "#fff",
+        align: "center",
+      }
+    )
     .setOrigin(0.5)
     .setScrollFactor(0)
     .setVisible(false);
@@ -118,13 +132,12 @@ function create() {
     .setOrigin(0.5)
     .setScrollFactor(0);
 
-    scoreText = this.add
-  .text(16, 16, "Score: 0", {
-    fontSize: "24px",
-    fill: "#fff",
-  })
-  .setScrollFactor(0);
-
+  scoreText = this.add
+    .text(16, 16, "Score: 0", {
+      fontSize: "24px",
+      fill: "#fff",
+    })
+    .setScrollFactor(0);
 }
 
 function update() {
@@ -143,8 +156,11 @@ function update() {
   if (!gameStarted) {
     if (cursors.up.isDown && player.body.touching.down) {
       player.setVelocityY(-500);
+      if (jumpSound) jumpSound.play();
       gameStarted = true;
       startText.setVisible(false);
+      if (themeMusic) themeMusic.play();
+      nextObstacleTime = this.time.now + Phaser.Math.Between(1000, 2200);
     }
     return;
   }
@@ -173,6 +189,7 @@ function update() {
 
   if (cursors.up.isDown && player.body.touching.down) {
     player.setVelocityY(-500);
+    if (jumpSound) jumpSound.play();
   }
 
   if (player.body.touching.down) {
@@ -197,7 +214,8 @@ function update() {
 function spawnObstacle(groundY) {
   const spawnX = this.cameras.main.scrollX + config.width - 100;
 
-  const obstacle = obstacles.create(spawnX, groundY - 72, "block")
+  const obstacle = obstacles
+    .create(spawnX, groundY - 72, "block")
     .setOrigin(0, 0)
     .setImmovable(true);
 
@@ -206,6 +224,9 @@ function spawnObstacle(groundY) {
 }
 
 function hitObstacle(player, obstacle) {
+  if (themeMusic && themeMusic.isPlaying) {
+    themeMusic.stop();
+  }
   this.physics.pause();
   player.setTint(0xff0000);
   player.anims.stop();
