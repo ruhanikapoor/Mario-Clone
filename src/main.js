@@ -39,8 +39,28 @@ let nextObstacleTime = 0;
 let themeMusic;
 let jumpSound;
 
+const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 const game = new Phaser.Game(config);
 const tileWidth = 54;
+
+function checkOrientation() {
+  const isPortrait = window.innerHeight > window.innerWidth;
+  const isMobile = /Mobi|Android/i.test(navigator.userAgent);
+  const warning = document.getElementById("rotate-warning");
+
+  if (isPortrait && isMobile) {
+    warning.style.display = "flex";
+    game.canvas.style.display = "none";
+  } else {
+    warning.style.display = "none";
+    game.canvas.style.display = "block";
+  }
+}
+
+window.addEventListener("resize", checkOrientation);
+window.addEventListener("orientationchange", checkOrientation);
+window.addEventListener("load", checkOrientation);
+
 
 function preload() {
   this.load.audio("theme", "/assets/theme.mp3");
@@ -112,7 +132,7 @@ function create() {
     .text(
       config.width / 2,
       config.height / 2,
-      "Game Over!!\nPress R to Restart",
+      isMobile ? "Game Over!!\nTap to Restart" : "Game Over!!\nPress R to Restart",
       {
         fontSize: "32px",
         fill: "#fff",
@@ -124,11 +144,14 @@ function create() {
     .setVisible(false);
 
   startText = this.add
-    .text(config.width / 2, config.height / 2 - 100, "Press ↑ to jump!", {
-      fontSize: "28px",
-      fill: "#fff",
-      align: "center",
-    })
+    .text(config.width / 2, config.height / 2 - 100,
+      isMobile ? "Tap to jump!" : "Press ↑ to jump!",
+      {
+        fontSize: "28px",
+        fill: "#fff",
+        align: "center",
+      }
+    )
     .setOrigin(0.5)
     .setScrollFactor(0);
 
@@ -141,9 +164,11 @@ function create() {
 }
 
 function update() {
+  const tapped = isMobile && this.input.activePointer.isDown;
+
   if (gameOver) {
     const rKey = this.input.keyboard.addKey("R");
-    if (Phaser.Input.Keyboard.JustDown(rKey)) {
+    if (Phaser.Input.Keyboard.JustDown(rKey) || tapped) {
       this.scene.restart();
       gameOver = false;
       gameStarted = false;
@@ -154,7 +179,8 @@ function update() {
   }
 
   if (!gameStarted) {
-    if (cursors.up.isDown && player.body.touching.down) {
+    const jumped = cursors.up.isDown || tapped;
+    if (jumped && player.body.touching.down) {
       player.setVelocityY(-500);
       if (jumpSound) jumpSound.play();
       gameStarted = true;
@@ -187,7 +213,8 @@ function update() {
     }
   });
 
-  if (cursors.up.isDown && player.body.touching.down) {
+  const jumped = cursors.up.isDown || tapped;
+  if (jumped && player.body.touching.down) {
     player.setVelocityY(-500);
     if (jumpSound) jumpSound.play();
   }
@@ -205,7 +232,6 @@ function update() {
   const currentTime = this.time.now;
   if (currentTime > nextObstacleTime) {
     spawnObstacle.call(this, groundY);
-
     const delay = Phaser.Math.Between(1000, 5300);
     nextObstacleTime = currentTime + delay;
   }
