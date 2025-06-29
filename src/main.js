@@ -102,7 +102,7 @@ function create() {
   this.anims.create({
     key: "walk",
     frames: this.anims.generateFrameNumbers("mario", { start: 0, end: 2 }),
-    frameRate: 6,
+    frameRate: 9,
     repeat: -1,
   });
 
@@ -165,10 +165,10 @@ function update() {
     return;
   }
 
-  const scrollSpeed = 3;
+  const scrollSpeed = 5;
   this.cameras.main.scrollX += scrollSpeed;
 
-  if (bg) bg.tilePositionX = this.cameras.main.scrollX * 0.3;
+  if (bg) bg.tilePositionX = this.cameras.main.scrollX * 0.5;
 
   const scrollX = this.cameras.main.scrollX;
   player.x = scrollX + 100;
@@ -215,7 +215,7 @@ function spawnObstacle(groundY) {
   const spawnX = this.cameras.main.scrollX + config.width - 100;
 
   const obstacle = obstacles
-    .create(spawnX, groundY - 72, "block")
+    .create(spawnX, groundY - 70, "block")
     .setOrigin(0, 0)
     .setImmovable(true);
 
