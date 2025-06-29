@@ -45,7 +45,6 @@ const tileWidth = 54;
 
 function checkOrientation(forceReload = false) {
   const isPortrait = window.innerHeight > window.innerWidth;
-  const isMobile = /Mobi|Android/i.test(navigator.userAgent);
   const warning = document.getElementById("rotate-warning");
 
   if (isMobile) {
@@ -59,6 +58,9 @@ function checkOrientation(forceReload = false) {
         location.reload();
       }
     }
+  } else {
+    warning.style.display = "none";
+    game.canvas.style.display = "block";
   }
 }
 
@@ -71,7 +73,6 @@ window.addEventListener("resize", () => {
 });
 
 window.addEventListener("load", () => checkOrientation(false));
-
 
 function preload() {
   this.load.audio("theme", "/assets/theme.mp3");
@@ -143,7 +144,9 @@ function create() {
     .text(
       config.width / 2,
       config.height / 2,
-      isMobile ? "Game Over!!\nTap to Restart" : "Game Over!!\nPress R to Restart",
+      isMobile
+        ? "Game Over!!\nTap to Restart"
+        : "Game Over!!\nPress R to Restart",
       {
         fontSize: "32px",
         fill: "#fff",
@@ -155,7 +158,9 @@ function create() {
     .setVisible(false);
 
   startText = this.add
-    .text(config.width / 2, config.height / 2 - 100,
+    .text(
+      config.width / 2,
+      config.height / 2 - 100,
       isMobile ? "Tap to jump!" : "Press ↑ to jump!",
       {
         fontSize: "28px",
@@ -175,7 +180,9 @@ function create() {
 }
 
 function update() {
-  const tapped = isMobile && this.input.activePointer.isDown;
+  const warningVisible =
+    document.getElementById("rotate-warning")?.style.display === "flex";
+  const tapped = isMobile && this.input.activePointer.isDown && !warningVisible;
 
   if (gameOver) {
     const rKey = this.input.keyboard.addKey("R");
@@ -190,7 +197,7 @@ function update() {
   }
 
   if (!gameStarted) {
-    const jumped = cursors.up.isDown || tapped;
+    const jumped = (cursors.up.isDown || tapped) && !warningVisible;
     if (jumped && player.body.touching.down) {
       player.setVelocityY(-500);
       if (jumpSound) jumpSound.play();
